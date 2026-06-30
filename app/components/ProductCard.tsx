@@ -1,75 +1,147 @@
 'use client';
 
-import { useRef, useState } from 'react';
-import Link from 'next/link';
+import { useState, useRef } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Heart, ShoppingBag, Star } from 'lucide-react';
+import { Heart, ShoppingBag, Eye, Star } from 'lucide-react';
 import { Product } from '@/lib/data';
 import { useCartStore } from '@/store/cartStore';
 import { useWishlistStore } from '@/store/wishlistStore';
 import { useUIStore } from '@/store/uiStore';
+import { formatPrice } from '@/lib/helpers';
 
 export default function ProductCard({ product }: { product: Product }) {
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const [hovered, setHovered] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
-  const [tiltStyle, setTiltStyle] = useState({});
-  const addItem = useCartStore((s) => s.addItem);
-  const toggleWishlist = useWishlistStore((s) => s.toggle);
-  const isWishlisted = useWishlistStore((s) => s.isInWishlist(product.id));
-  const showToast = useUIStore((s) => s.showToast);
 
-  const handleMouseMove = (e: React.MouseEvent) => {
+  const addItem    = useCartStore((s) => s.addItem);
+  const toggleWish = useWishlistStore((s) => s.toggle);
+  const isWished   = useWishlistStore((s) => s.isInWishlist(product.id));
+  const showToast  = useUIStore((s) => s.showToast);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    setTiltStyle({ transform: `perspective(1000px) rotateX(${y*5}deg) rotateY(${x*5}deg) scale3d(1.02,1.02,1.02)` });
+    const x = ((e.clientY - rect.top)  / rect.height - 0.5) * 12;
+    const y = ((e.clientX - rect.left) / rect.width  - 0.5) * -12;
+    setTilt({ x, y });
   };
 
-  const handleMouseLeave = () => {
-    setTiltStyle({ transform: 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1,1,1)' });
-  };
-
-  const quickAdd = (e: React.MouseEvent) => {
+  const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
-    e.stopPropagation();
-    addItem({ productId: product.id, name: product.name, image: product.images[0], price: product.price, size: product.sizes[0], color: product.colors[0].name, quantity: 1 });
-    showToast(`${product.name} added to cart`);
+    addItem({
+      productId: product.id,
+      name:      product.name,
+      image:     product.images[0],
+      price:     product.price,
+      size:      product.sizes[0],
+      color:     product.colors[0].name,
+      quantity:  1,
+    });
+    showToast(`${product.name} added to cart ✓`);
   };
+
+  const discount = product.originalPrice
+    ? Math.round((1 - product.price / product.originalPrice) * 100)
+    : null;
 
   return (
-    <motion.div ref={cardRef} onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave} style={tiltStyle}
-      className="group relative bg-white/40 backdrop-blur-sm rounded-3xl overflow-hidden shadow-soft hover:shadow-elevated transition-all duration-500"
-      whileHover={{ y: -8 }} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
-      <Link href={`/products/${product.id}`} className="block">
-        <div className="relative aspect-[3/4] overflow-hidden">
-          <Image src={product.images[0]} alt={product.name} fill className="object-cover transition-transform duration-700 group-hover:scale-105" sizes="(max-width:640px) 100vw,(max-width:1024px) 50vw,25vw" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          {product.originalPrice && <span className="absolute top-4 left-4 bg-rose-500 text-white text-xs px-3 py-1.5 rounded-full font-semibold">SALE</span>}
-          <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWishlist(product.id); }}
-            className="absolute top-4 right-4 p-2.5 bg-white/80 rounded-full backdrop-blur-sm hover:bg-white transition-all" aria-label="Wishlist">
-            <Heart className={`h-4 w-4 ${isWishlisted ? 'fill-rose-500 text-rose-500' : 'text-off-black'}`} />
-          </button>
-          <button onClick={quickAdd}
-            className="absolute bottom-4 left-4 right-4 bg-off-black/90 backdrop-blur-sm text-white py-3 rounded-2xl text-sm font-medium opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 flex items-center justify-center gap-2">
-            <ShoppingBag className="h-4 w-4" /> Quick Add
-          </button>
-        </div>
-        <div className="p-5">
-          <h3 className="text-base font-display font-semibold text-off-black truncate">{product.name}</h3>
-          <div className="flex items-center space-x-2 mt-1.5">
-            <div className="flex text-amber-400">
-              {[...Array(5)].map((_, i) => <Star key={i} className={`h-3.5 w-3.5 ${i < Math.floor(product.rating) ? 'fill-current' : 'text-gray-300'}`} />)}
-            </div>
-            <span className="text-xs text-off-black/50">({product.reviewCount})</span>
+    <motion.div
+      ref={cardRef}
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-40px' }}
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => { setHovered(false); setTilt({ x: 0, y: 0 }); }}
+      style={{
+        transform: hovered
+          ? `perspective(900px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) scale3d(1.025, 1.025, 1.025)`
+          : 'perspective(900px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)',
+        transition: 'transform 0.25s ease-out',
+        willChange: 'transform',
+      }}
+    >
+      <Link href={`/products/${product.id}`} className="group block">
+        {/* Image */}
+        <div className="relative aspect-[3/4] rounded-3xl overflow-hidden bg-white/30">
+          <Image
+            src={product.images[0]}
+            alt={product.name}
+            fill
+            sizes="(max-width:640px) 100vw, (max-width:1024px) 50vw, 25vw"
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-108"
+          />
+
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400" />
+
+          {/* Badges */}
+          <div className="absolute top-3 left-3 flex flex-col gap-1.5">
+            {product.featured && (
+              <span className="btn-glass text-[11px] font-semibold px-2.5 py-1 rounded-full text-emerald-700">Featured</span>
+            )}
+            {discount && (
+              <span className="bg-rose-500 text-white text-[11px] font-semibold px-2.5 py-1 rounded-full">−{discount}%</span>
+            )}
           </div>
-          <div className="mt-3 flex items-center justify-between">
+
+          {/* Action buttons */}
+          <div className="absolute top-3 right-3 flex flex-col gap-2">
+            <motion.button
+              onClick={(e) => { e.preventDefault(); toggleWish(product.id); }}
+              className="p-2.5 btn-glass rounded-full backdrop-blur-sm"
+              whileHover={{ scale: 1.12 }}
+              whileTap={{ scale: 0.92 }}
+            >
+              <Heart className={`h-4 w-4 transition-colors ${isWished ? 'fill-rose-500 text-rose-500' : 'text-off-black/70'}`} />
+            </motion.button>
+            <motion.button
+              onClick={handleAddToCart}
+              className="p-2.5 btn-glass rounded-full backdrop-blur-sm"
+              whileHover={{ scale: 1.12 }}
+              whileTap={{ scale: 0.92 }}
+            >
+              <ShoppingBag className="h-4 w-4 text-off-black/70" />
+            </motion.button>
+          </div>
+
+          {/* Quick view — bottom slide-up */}
+          <motion.div
+            className="absolute bottom-3 left-3 right-3"
+            initial={{ y: 20, opacity: 0 }}
+            animate={hovered ? { y: 0, opacity: 1 } : { y: 20, opacity: 0 }}
+            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <button
+              onClick={(e) => e.preventDefault()}
+              className="w-full btn-glass-dark text-white text-xs font-semibold py-2.5 rounded-2xl flex items-center justify-center gap-2"
+            >
+              <Eye className="h-3.5 w-3.5" />
+              Quick View
+            </button>
+          </motion.div>
+        </div>
+
+        {/* Info */}
+        <div className="mt-4 px-1">
+          <p className="text-[11px] uppercase tracking-widest text-off-black/40 mb-1">{product.category}</p>
+          <h3 className="font-semibold text-sm leading-tight mb-1.5 group-hover:text-off-black transition-colors line-clamp-2">
+            {product.name}
+          </h3>
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-lg font-bold">${product.price}</span>
-              {product.originalPrice && <span className="text-sm text-off-black/40 line-through">${product.originalPrice}</span>}
+              <span className="font-bold text-base">{formatPrice(product.price)}</span>
+              {product.originalPrice && (
+                <span className="text-xs text-off-black/35 line-through">{formatPrice(product.originalPrice)}</span>
+              )}
             </div>
-            <div className="flex -space-x-1">
-              {product.colors.slice(0, 3).map((c) => <div key={c.hex} className="w-4 h-4 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor: c.hex }} title={c.name} />)}
+            <div className="flex items-center gap-1">
+              <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+              <span className="text-xs text-off-black/50">{product.rating}</span>
             </div>
           </div>
         </div>

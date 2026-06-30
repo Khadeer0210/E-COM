@@ -2,62 +2,98 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import MagneticButton from './MagneticButton';
 import { ArrowRight, Sparkles } from 'lucide-react';
+
+const stats = [
+  { value: '250+', label: 'Products' },
+  { value: '15K+', label: 'Happy Clients' },
+  { value: '45+',  label: 'Countries' },
+];
+
+const container: any = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.12, delayChildren: 0.1 } },
+};
+const item: any = {
+  hidden: { opacity: 0, y: 30 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] } },
+};
 
 export default function Hero() {
   return (
-    <section className="relative min-h-[90vh] flex items-center overflow-hidden">
-      {/* Decorative elements */}
-      <div className="absolute top-20 right-20 w-72 h-72 bg-rose-200/30 rounded-full blur-3xl animate-float" />
-      <div className="absolute bottom-20 left-10 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl" style={{ animationDelay: '2s' }} />
+    <section className="relative min-h-[92vh] flex items-center overflow-hidden px-4 sm:px-6">
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full">
-        <div className="max-w-3xl">
-          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}
-            className="inline-flex items-center gap-2 bg-white/50 backdrop-blur-sm px-4 py-2 rounded-full mb-8">
-            <Sparkles className="h-4 w-4 text-rose-500" />
-            <span className="text-sm font-medium text-off-black/70">New Summer Collection 2026</span>
-          </motion.div>
+      {/* Decorative floating orbs */}
+      {[
+        { size: 520, top: '-10%', right: '-5%',  from: 'rgba(168,85,247,0.12)', to: 'rgba(236,72,153,0.08)', delay: 0 },
+        { size: 380, bottom: '5%', left: '-8%',  from: 'rgba(59,130,246,0.10)', to: 'rgba(16,185,129,0.07)', delay: 1.5 },
+        { size: 260, top: '40%',  right: '12%',  from: 'rgba(251,191,36,0.10)', to: 'rgba(239,68,68,0.07)',  delay: 3 },
+      ].map((orb, i) => (
+        <motion.div
+          key={i}
+          className="absolute rounded-full pointer-events-none gpu"
+          style={{
+            width: orb.size, height: orb.size,
+            top: orb.top, bottom: orb.bottom, left: orb.left, right: orb.right,
+            background: `radial-gradient(circle, ${orb.from}, ${orb.to}, transparent 70%)`,
+            filter: 'blur(60px)',
+          }}
+          animate={{ y: [0, -20, 0], scale: [1, 1.06, 1], rotate: [0, 5, 0] }}
+          transition={{ duration: 8 + i * 2, repeat: Infinity, ease: 'easeInOut', delay: orb.delay }}
+        />
+      ))}
 
-          <motion.h1 initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1 }}
-            className="text-5xl sm:text-7xl lg:text-8xl font-display font-bold text-off-black leading-[0.95] tracking-tight">
-            Redefine
-            <br />
-            <span className="bg-gradient-to-r from-rose-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent">
-              Your Style
-            </span>
-          </motion.h1>
+      <motion.div
+        variants={container}
+        initial="hidden"
+        animate="show"
+        className="max-w-7xl mx-auto w-full z-10"
+      >
+        {/* Badge */}
+        <motion.div variants={item}>
+          <span className="inline-flex items-center gap-2 btn-glass text-sm font-medium px-4 py-2 rounded-full mb-8 text-off-black/70">
+            <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+            New Summer Collection 2026
+          </span>
+        </motion.div>
 
-          <motion.p initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }}
-            className="mt-6 text-lg sm:text-xl text-off-black/60 max-w-lg leading-relaxed">
-            Curated luxury fashion for the modern connoisseur. Discover pieces that transcend trends and define elegance.
-          </motion.p>
+        {/* Headline */}
+        <motion.h1 variants={item} className="text-6xl sm:text-7xl lg:text-8xl font-display font-bold leading-none mb-6 max-w-4xl">
+          Redefine
+          <br />
+          <span className="shimmer-text">Your Style</span>
+        </motion.h1>
 
-          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.3 }}
-            className="mt-10 flex flex-wrap gap-4">
-            <Link href="/products"
-              className="group inline-flex items-center gap-2 bg-off-black text-white px-8 py-4 rounded-full font-medium hover:bg-off-black/90 transition-all hover:gap-3">
-              Shop Collection
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </Link>
-            <Link href="/about"
-              className="inline-flex items-center gap-2 bg-white/50 backdrop-blur-sm text-off-black px-8 py-4 rounded-full font-medium hover:bg-white/70 transition border border-off-black/10">
-              Our Story
-            </Link>
-          </motion.div>
+        {/* Subline */}
+        <motion.p variants={item} className="text-lg sm:text-xl text-off-black/55 max-w-xl leading-relaxed mb-10">
+          Curated luxury fashion for the modern connoisseur.
+          Discover pieces that transcend trends and define elegance.
+        </motion.p>
 
-          {/* Stats */}
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
-            className="mt-16 flex gap-12">
-            {[{ label: 'Products', value: '250+' }, { label: 'Happy Clients', value: '15K+' }, { label: 'Countries', value: '45+' }].map((stat) => (
-              <div key={stat.label}>
-                <p className="text-2xl sm:text-3xl font-bold font-display">{stat.value}</p>
-                <p className="text-sm text-off-black/50 mt-1">{stat.label}</p>
-              </div>
-            ))}
-          </motion.div>
-        </div>
-      </div>
+        {/* CTAs */}
+        <motion.div variants={item} className="flex flex-wrap gap-4">
+          <MagneticButton href="/products" strength={0.4}
+            className="btn-primary inline-flex items-center gap-2.5 px-8 py-4 rounded-full font-semibold text-base group">
+            Shop Collection
+            <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+          </MagneticButton>
+          <MagneticButton href="/about" strength={0.35}
+            className="btn-glass inline-flex items-center gap-2.5 px-8 py-4 rounded-full font-semibold text-base text-off-black/80">
+            Our Story
+          </MagneticButton>
+        </motion.div>
+
+        {/* Stats */}
+        <motion.div variants={item} className="mt-16 flex gap-10 sm:gap-16">
+          {stats.map((s) => (
+            <div key={s.label}>
+              <p className="text-3xl font-display font-bold">{s.value}</p>
+              <p className="text-sm text-off-black/45 mt-1">{s.label}</p>
+            </div>
+          ))}
+        </motion.div>
+      </motion.div>
     </section>
   );
 }

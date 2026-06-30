@@ -3,92 +3,219 @@
 
 @import "tailwindcss";
 
-/* Theme configuration (Tailwind v4) */
+/* ─── Theme (Tailwind v4) ─────────────────────────────────────────────────── */
 @theme inline {
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
-  --font-display: 'SF Pro Display', -apple-system, BlinkMacSystemFont, ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Playfair Display', Georgia, serif;
   --font-serif: 'Playfair Display', Georgia, serif;
 
   --color-off-black: #0A0A0A;
   --color-pure-white: #FFFFFF;
   --color-glass: rgba(255, 255, 255, 0.08);
 
-  --shadow-soft: 0 10px 40px -10px rgba(0, 0, 0, 0.06), 0 2px 10px -5px rgba(0, 0, 0, 0.04);
-  --shadow-elevated: 0 20px 50px -12px rgba(0, 0, 0, 0.15);
-  --shadow-colored: 0 20px 50px -12px rgba(236, 72, 153, 0.25);
+  --shadow-soft:     0 8px 32px -8px rgba(0,0,0,0.07), 0 2px 8px -4px rgba(0,0,0,0.04);
+  --shadow-elevated: 0 24px 60px -12px rgba(0,0,0,0.18);
+  --shadow-glass:    0 8px 32px rgba(31,38,135,0.10);
+  --shadow-colored:  0 20px 50px -12px rgba(236,72,153,0.25);
+  --shadow-glow:     0 0 40px rgba(168,85,247,0.20), 0 0 80px rgba(236,72,153,0.10);
 
   --radius-4xl: 2rem;
 
-  --animate-marquee: marquee 20s linear infinite;
-  --animate-float: float 6s ease-in-out infinite;
+  --animate-marquee:     marquee 28s linear infinite;
+  --animate-float:       float 6s ease-in-out infinite;
+  --animate-shimmer:     shimmer 2.4s linear infinite;
+  --animate-pulse-glow:  pulse-glow 3s ease-in-out infinite;
 
   --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
 
   @keyframes marquee {
-    0% { transform: translateX(0%); }
+    0%   { transform: translateX(0%); }
     100% { transform: translateX(-50%); }
   }
-
   @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    33%       { transform: translateY(-12px) rotate(1deg); }
+    66%       { transform: translateY(-6px) rotate(-1deg); }
+  }
+  @keyframes shimmer {
+    0%   { background-position: -200% center; }
+    100% { background-position:  200% center; }
+  }
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 20px rgba(168,85,247,0.3); }
+    50%       { box-shadow: 0 0 40px rgba(236,72,153,0.5), 0 0 80px rgba(168,85,247,0.2); }
   }
 }
 
-/* Custom properties for dynamic background */
-:root {
-  --bg-gradient: linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%);
+/* ─── Base ────────────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
-/* Glass morphism utility */
-.glass {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-/* Smooth scrolling */
 html {
   scroll-behavior: smooth;
 }
 
-/* Scrollbar styling */
-::-webkit-scrollbar {
-  width: 6px;
+body {
+  color: var(--color-off-black);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  cursor: none; /* hide default cursor — RainbowCursor takes over */
 }
-::-webkit-scrollbar-track {
-  background: transparent;
-}
+
+/* ─── Scrollbar ───────────────────────────────────────────────────────────── */
+::-webkit-scrollbar       { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.2);
+  background: linear-gradient(to bottom, #a855f7, #ec4899);
   border-radius: 3px;
 }
 
-/* Focus ring */
+/* ─── Focus ring ──────────────────────────────────────────────────────────── */
 *:focus-visible {
   outline: 2px solid #ec4899;
-  outline-offset: 2px;
+  outline-offset: 3px;
+  border-radius: 4px;
 }
 
-/* Reduce motion */
+/* ─── Glassmorphism utilities ─────────────────────────────────────────────── */
+.glass {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.glass-dark {
+  background: rgba(10, 10, 10, 0.55);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ─── Glassmorphic button ─────────────────────────────────────────────────── */
+.btn-glass {
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.30);
+  color: inherit;
+  transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s var(--ease-spring);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.4);
+}
+.btn-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 60%);
+  pointer-events: none;
+}
+.btn-glass:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.45);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,255,255,0.3), inset 0 1px 0 rgba(255,255,255,0.5);
+  transform: translateY(-2px);
+}
+.btn-glass:active { transform: translateY(0px); }
+
+/* Dark glass button (for footer / dark backgrounds) */
+.btn-glass-dark {
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #fff;
+  transition: background 0.25s ease, border-color 0.25s ease, transform 0.2s var(--ease-spring);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.12);
+}
+.btn-glass-dark:hover {
+  background: rgba(255,255,255,0.15);
+  border-color: rgba(255,255,255,0.30);
+  transform: translateY(-2px);
+}
+
+/* Primary dark button */
+.btn-primary {
+  background: #0A0A0A;
+  color: #fff;
+  border: 1px solid transparent;
+  transition: background 0.25s ease, box-shadow 0.25s ease, transform 0.2s var(--ease-spring);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.20);
+  position: relative;
+  overflow: hidden;
+}
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(168,85,247,0.15) 0%, rgba(236,72,153,0.10) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.btn-primary:hover::after { opacity: 1; }
+.btn-primary:hover {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.30), 0 0 0 1px rgba(168,85,247,0.3);
+  transform: translateY(-2px);
+}
+.btn-primary:active { transform: translateY(0); }
+
+/* ─── Iridescent shimmer text ─────────────────────────────────────────────── */
+.shimmer-text {
+  background: linear-gradient(
+    90deg,
+    #ff0080 0%,
+    #a855f7 20%,
+    #3b82f6 40%,
+    #06b6d4 55%,
+    #10b981 70%,
+    #f59e0b 85%,
+    #ff0080 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 3s linear infinite;
+}
+
+/* ─── Card hover lift ─────────────────────────────────────────────────────── */
+.card-hover {
+  transition: transform 0.35s var(--ease-spring), box-shadow 0.35s ease;
+}
+.card-hover:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: var(--shadow-elevated);
+}
+
+/* ─── Page entrance ───────────────────────────────────────────────────────── */
+.page-enter {
+  animation: page-in 0.45s var(--ease-spring) both;
+}
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(24px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ─── Performance hints ───────────────────────────────────────────────────── */
+.will-change-transform { will-change: transform; }
+.will-change-opacity   { will-change: opacity; }
+.gpu {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* ─── Reduce motion ───────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-}
-
-/* Base typography */
-body {
-  background: var(--bg-gradient);
-  color: var(--color-off-black);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  transition: background 0.8s ease;
-  font-family: var(--font-sans);
 }
