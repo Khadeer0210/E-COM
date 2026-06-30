@@ -59,11 +59,20 @@ export default function Header() {
     setShopOpen(false);
   }, []);
 
-  const Badge = ({ n }: { n: number }) => n > 0 ? (
-    <span className="absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[10px] font-bold w-4.5 h-4.5 flex items-center justify-center rounded-full leading-none">
-      {n > 9 ? '9+' : n}
-    </span>
-  ) : null;
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const Badge = ({ n }: { n: number }) => {
+    if (!mounted) return null;
+    return n > 0 ? (
+      <span className="absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[10px] font-bold w-4.5 h-4.5 flex items-center justify-center rounded-full leading-none">
+        {n > 9 ? '9+' : n}
+      </span>
+    ) : null;
+  };
 
   return (
     <>
